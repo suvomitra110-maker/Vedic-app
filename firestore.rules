@@ -1,0 +1,245 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core Primitives
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity 1 Blueprint: UserChart
+    function isValidUserChart(data, userId) {
+      return data.keys().hasAll([
+        'userId',
+        'title',
+        'lagnaSign',
+        'wishFocus',
+        'summaryDictum',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId',
+        'title',
+        'lagnaSign',
+        'wishFocus',
+        'summaryDictum',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.userId is string &&
+      data.userId.size() >= 1 &&
+      data.userId.size() <= 128 &&
+      data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.userId == userId &&
+      data.userId == request.auth.uid &&
+      data.title is string &&
+      data.title.size() >= 1 &&
+      data.title.size() <= 120 &&
+      data.lagnaSign is int &&
+      data.lagnaSign >= 1 &&
+      data.lagnaSign <= 12 &&
+      data.wishFocus is string &&
+      data.wishFocus.size() >= 1 &&
+      data.wishFocus.size() <= 200 &&
+      data.summaryDictum is string &&
+      data.summaryDictum.size() >= 1 &&
+      data.summaryDictum.size() <= 2000 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Entity 2 Blueprint: DailyPlanItem
+    function isValidDailyPlanItem(data, userId) {
+      return data.keys().hasAll([
+        'userId',
+        'itemType',
+        'title',
+        'naturalMethod',
+        'targetPlanet',
+        'completed',
+        'dateKey',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId',
+        'itemType',
+        'title',
+        'naturalMethod',
+        'targetPlanet',
+        'completed',
+        'dateKey',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.userId is string &&
+      data.userId.size() >= 1 &&
+      data.userId.size() <= 128 &&
+      data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.userId == userId &&
+      data.userId == request.auth.uid &&
+      data.itemType is string &&
+      data.itemType.size() >= 4 &&
+      data.itemType.size() <= 16 &&
+      (data.itemType == 'plan' || data.itemType == 'remedy') &&
+      data.title is string &&
+      data.title.size() >= 1 &&
+      data.title.size() <= 160 &&
+      data.naturalMethod is string &&
+      data.naturalMethod.size() >= 1 &&
+      data.naturalMethod.size() <= 400 &&
+      data.targetPlanet is string &&
+      data.targetPlanet.size() >= 2 &&
+      data.targetPlanet.size() <= 12 &&
+      data.completed is bool &&
+      data.dateKey is string &&
+      data.dateKey.size() >= 8 &&
+      data.dateKey.size() <= 16 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Entity 3 Blueprint: HorizonRoadmap
+    function isValidHorizonRoadmap(data, userId) {
+      return data.keys().hasAll([
+        'userId',
+        'durationMonths',
+        'goalTitle',
+        'preferredTechnique',
+        'completedMilestonesCount',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId',
+        'durationMonths',
+        'goalTitle',
+        'preferredTechnique',
+        'completedMilestonesCount',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.userId is string &&
+      data.userId.size() >= 1 &&
+      data.userId.size() <= 128 &&
+      data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.userId == userId &&
+      data.userId == request.auth.uid &&
+      data.durationMonths is int &&
+      (data.durationMonths == 3 || data.durationMonths == 6 || data.durationMonths == 12) &&
+      data.goalTitle is string &&
+      data.goalTitle.size() >= 1 &&
+      data.goalTitle.size() <= 180 &&
+      data.preferredTechnique is string &&
+      data.preferredTechnique.size() >= 1 &&
+      data.preferredTechnique.size() <= 100 &&
+      data.completedMilestonesCount is int &&
+      data.completedMilestonesCount >= 0 &&
+      data.completedMilestonesCount <= 36 &&
+      data.status is string &&
+      data.status.size() >= 6 &&
+      data.status.size() <= 16 &&
+      (data.status == 'active' || data.status == 'archived') &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Collection 1: /users/{userId}/charts/{chartId}
+    match /users/{userId}/charts/{chartId} {
+      allow get: if isOwner(userId) && isValidId(userId) && isValidId(chartId) && existing().userId == request.auth.uid;
+      allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidId(chartId) &&
+        isValidUserChart(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidId(chartId) &&
+        isValidUserChart(incoming(), userId) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['title', 'lagnaSign', 'wishFocus', 'summaryDictum', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(userId) && isValidId(chartId) && existing().userId == request.auth.uid;
+    }
+
+    // Collection 2: /users/{userId}/dailyPlans/{planId}
+    match /users/{userId}/dailyPlans/{planId} {
+      allow get: if isOwner(userId) && isValidId(userId) && isValidId(planId) && existing().userId == request.auth.uid;
+      allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidId(planId) &&
+        isValidDailyPlanItem(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidId(planId) &&
+        isValidDailyPlanItem(incoming(), userId) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Action 1: Toggle completion status
+          incoming().diff(existing()).affectedKeys().hasOnly(['completed', 'updatedAt']) ||
+          // Action 2: Edit task details
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'naturalMethod', 'targetPlanet', 'completed', 'dateKey', 'updatedAt'])
+        );
+      allow delete: if isOwner(userId) && isValidId(userId) && isValidId(planId) && existing().userId == request.auth.uid;
+    }
+
+    // Collection 3: /users/{userId}/horizonPlans/{horizonId}
+    match /users/{userId}/horizonPlans/{horizonId} {
+      allow get: if isOwner(userId) && isValidId(userId) && isValidId(horizonId) && existing().userId == request.auth.uid;
+      allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidId(horizonId) &&
+        isValidHorizonRoadmap(incoming(), userId) &&
+        incoming().status == 'active' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidId(horizonId) &&
+        isValidHorizonRoadmap(incoming(), userId) &&
+        existing().status != 'archived' &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Action 1: Progress milestones
+          incoming().diff(existing()).affectedKeys().hasOnly(['completedMilestonesCount', 'updatedAt']) ||
+          // Action 2: Update horizon parameters or archive terminal state
+          incoming().diff(existing()).affectedKeys().hasOnly(['durationMonths', 'goalTitle', 'preferredTechnique', 'completedMilestonesCount', 'status', 'updatedAt'])
+        );
+      allow delete: if isOwner(userId) && isValidId(userId) && isValidId(horizonId) && existing().userId == request.auth.uid;
+    }
+  }
+}

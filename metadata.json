@@ -1,0 +1,6 @@
+{
+  "name": "Shastiamsha D-60 Chart Analyzer",
+  "description": "Interactive Vedic astrology analysis workbench for the Shastiamsha (D-60) divisional chart of well-being, karmic roots, planetary dignities, and yogas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

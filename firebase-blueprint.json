@@ -1,0 +1,205 @@
+{
+  "entities": {
+    "UserChart": {
+      "title": "UserChart",
+      "description": "A user's uploaded or custom-generated Vedic astrology chart and Lunar Astro dictum synthesis.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Chart title or native name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "lagnaSign": {
+          "type": "integer",
+          "description": "Ascendant sign number from 1 (Aries) to 12 (Pisces)."
+        },
+        "wishFocus": {
+          "type": "string",
+          "description": "User's primary life focus or consultation wish.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "summaryDictum": {
+          "type": "string",
+          "description": "Lunar Astro predictive synthesis for this chart.",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "lagnaSign",
+        "wishFocus",
+        "summaryDictum",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DailyPlanItem": {
+      "title": "DailyPlanItem",
+      "description": "A daily astrological plan action or natural remedy tracking item.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "itemType": {
+          "type": "string",
+          "description": "Whether this item tracks daily plan execution or a natural Vedic remedy.",
+          "enum": ["plan", "remedy"],
+          "minLength": 4,
+          "maxLength": 16
+        },
+        "title": {
+          "type": "string",
+          "description": "Name of the daily plan task or natural remedy.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "naturalMethod": {
+          "type": "string",
+          "description": "Natural behavioral, pranic, or lifestyle method for executing the remedy.",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "targetPlanet": {
+          "type": "string",
+          "description": "Target Vedic planet symbol (e.g., Me, Sa, Ma, Ju, Ve, Mo, Su, Ra, Ke).",
+          "minLength": 2,
+          "maxLength": 12
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Whether completed for the current day."
+        },
+        "dateKey": {
+          "type": "string",
+          "description": "ISO date key YYYY-MM-DD.",
+          "minLength": 8,
+          "maxLength": 16
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": [
+        "userId",
+        "itemType",
+        "title",
+        "naturalMethod",
+        "targetPlanet",
+        "completed",
+        "dateKey",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HorizonRoadmap": {
+      "title": "HorizonRoadmap",
+      "description": "A 3-month, 6-month, or 12-month custom Vedic Dasha and transit roadmap.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "durationMonths": {
+          "type": "integer",
+          "description": "Selected planning horizon in months (3, 6, or 12).",
+          "enum": [3, 6, 12]
+        },
+        "goalTitle": {
+          "type": "string",
+          "description": "User's chosen 3/6/12-month objective.",
+          "minLength": 1,
+          "maxLength": 180
+        },
+        "preferredTechnique": {
+          "type": "string",
+          "description": "Primary Vedic predictive technique applied to the plan.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "completedMilestonesCount": {
+          "type": "integer",
+          "description": "Number of completed monthly milestones."
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle status of the horizon roadmap.",
+          "enum": ["active", "archived"],
+          "minLength": 6,
+          "maxLength": 16
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": [
+        "userId",
+        "durationMonths",
+        "goalTitle",
+        "preferredTechnique",
+        "completedMilestonesCount",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/charts/{chartId}": {
+      "schema": { "$ref": "#/entities/UserChart" },
+      "description": "Stores private uploaded or custom-generated Vedic charts isolated by user UID."
+    },
+    "/users/{userId}/dailyPlans/{planId}": {
+      "schema": { "$ref": "#/entities/DailyPlanItem" },
+      "description": "Stores daily plan actions and natural Vedic remedy tracking records isolated by user UID."
+    },
+    "/users/{userId}/horizonPlans/{horizonId}": {
+      "schema": { "$ref": "#/entities/HorizonRoadmap" },
+      "description": "Stores 3-month, 6-month, and 12-month custom Vedic plans isolated by user UID."
+    }
+  }
+}

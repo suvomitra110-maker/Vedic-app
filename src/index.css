@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --wix-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #F8FAFC;
+    color: #0F172A;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono-tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes wixModuleEnter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes wixDropdownEnter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes wixDropdownItemEnter {
+  0% {
+    opacity: 0;
+    transform: translate3d(-4px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes wixCodeSwap {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.wix-module-transition {
+  animation: wixModuleEnter 200ms var(--wix-ease) both;
+  will-change: transform, opacity;
+}
+
+.wix-dropdown-transition {
+  animation: wixDropdownEnter 180ms var(--wix-ease) both;
+  transform-origin: top left;
+  will-change: transform, opacity;
+}
+
+.wix-dropdown-item {
+  animation: wixDropdownItemEnter 160ms var(--wix-ease) both;
+}
+
+.wix-code-transition {
+  animation: wixCodeSwap 160ms var(--wix-ease) both;
+}
+
+.wix-chevron-transition {
+  transition: transform 180ms var(--wix-ease);
+}
+
+.wix-nav-indicator {
+  transition: transform 180ms var(--wix-ease), opacity 180ms var(--wix-ease);
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wix-module-transition,
+  .wix-dropdown-transition,
+  .wix-dropdown-item,
+  .wix-code-transition {
+    animation: none !important;
+  }
+  .wix-chevron-transition,
+  .wix-nav-indicator {
+    transition: none !important;
+  }
+}
